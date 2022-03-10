@@ -5,8 +5,30 @@ pub mod board {
         LocationTaken,
     }
 
-    pub struct Location(pub u8, pub u8);
+    #[derive(PartialEq, Debug)]
+    pub struct Location(u8, u8);
 
+    impl Location {
+        pub fn new(x: u8, y: u8) -> Result<Self, BoardError> {
+            Location::valid_location(x, y)?;
+            Ok(Location(x, y))
+        }
+
+        fn valid_location(x: u8, y: u8) -> Result<(), BoardError> {
+            match (x, y) {
+                (x, y) if x < 3 && y < 3 => Ok(()),
+                (_, _) => return Err(BoardError::InvalidLocation),
+            }
+        }
+
+        pub fn get_x(&self) -> u8 {
+            self.0
+        }
+
+        pub fn get_y(&self) -> u8 {
+            self.1
+        }
+    }
     #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum Symbol {
         X,
@@ -24,9 +46,7 @@ pub mod board {
             }
         }
 
-        pub fn place(self, _symbol: Symbol, location: Location) -> Result<Self, BoardError> {
-            Board::valid_location(&location)?;
-
+        pub fn place(self, _symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
             // check if place on board is free
             if self.get_symbol(location) != None {
                 return Err(BoardError::LocationTaken);
@@ -34,14 +54,18 @@ pub mod board {
             todo!();
         }
 
-        fn valid_location(location: &Location) -> Result<(), BoardError> {
-            match *location {
-                Location(x, y) if x < 3 && y < 3 => Ok(()),
-                Location(_, _) => return Err(BoardError::InvalidLocation),
+        fn get_slot<'a>(
+            &'a mut self,
+            location: &Location,
+        ) -> Result<&'a mut Option<Symbol>, BoardError> {
+            if self.get_symbol(location) != None {
+                Err(BoardError::LocationTaken)
+            } else {
+                Ok(&mut self.board[location.get_x() as usize][location.get_y() as usize])
             }
         }
 
-        fn get_symbol(&self, location: Location) -> Option<Symbol> {
+        fn get_symbol(&self, location: &Location) -> Option<Symbol> {
             *self
                 .board
                 .get(location.0 as usize)
@@ -58,8 +82,19 @@ mod tests {
     use super::board::*;
     #[test]
     fn invalid_location() {
-        let board = Board::new();
-        let res = board.place(Symbol::O, Location(3, 2));
-        assert_eq!(res, Err(BoardError::InvalidLocation));
+        assert_eq!(Location::new(3, 2), Err(BoardError::InvalidLocation));
+        assert_eq!(Location::new(1, 4), Err(BoardError::InvalidLocation));
+    }
+    #[test]
+    fn valid_location() {
+        let location = Location::new(1, 2).unwrap();
+        assert_eq!(location.get_x(), 1_u8);
+        assert_eq!(location.get_y(), 2_u8);
+    }
+    #[test]
+    fn zero_location() {
+        let location = Location::new(0, 0).unwrap();
+        assert_eq!(location.get_x(), 0);
+        assert_eq!(location.get_y(), 0);
     }
 }
