@@ -83,6 +83,7 @@ pub mod board {
             }
         }
 
+        // TODO:refactor to make placing easier and not expose the location struct
         pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
             // check if place on board is free
             if self.get_symbol(location) != None {
