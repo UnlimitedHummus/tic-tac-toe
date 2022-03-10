@@ -29,11 +29,13 @@ pub mod board {
             self.1
         }
     }
+
     #[derive(Debug, PartialEq, Eq, Clone, Copy)]
     pub enum Symbol {
         X,
         O,
     }
+
     #[derive(PartialEq, Debug)]
     pub struct Board {
         board: [[Option<Symbol>; 3]; 3],
@@ -46,12 +48,13 @@ pub mod board {
             }
         }
 
-        pub fn place(self, _symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
+        pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
             // check if place on board is free
             if self.get_symbol(location) != None {
                 return Err(BoardError::LocationTaken);
             }
-            todo!();
+            *self.get_slot(location)? = Some(symbol);
+            Ok(self)
         }
 
         fn get_slot<'a>(
@@ -75,26 +78,56 @@ pub mod board {
                 .unwrap()
         }
     }
-}
 
-#[cfg(test)]
-mod tests {
-    use super::board::*;
-    #[test]
-    fn invalid_location() {
-        assert_eq!(Location::new(3, 2), Err(BoardError::InvalidLocation));
-        assert_eq!(Location::new(1, 4), Err(BoardError::InvalidLocation));
-    }
-    #[test]
-    fn valid_location() {
-        let location = Location::new(1, 2).unwrap();
-        assert_eq!(location.get_x(), 1_u8);
-        assert_eq!(location.get_y(), 2_u8);
-    }
-    #[test]
-    fn zero_location() {
-        let location = Location::new(0, 0).unwrap();
-        assert_eq!(location.get_x(), 0);
-        assert_eq!(location.get_y(), 0);
+    #[cfg(test)]
+    mod tests {
+        use super::*;
+        #[test]
+        fn invalid_location() {
+            assert_eq!(Location::new(3, 2), Err(BoardError::InvalidLocation));
+            assert_eq!(Location::new(1, 4), Err(BoardError::InvalidLocation));
+        }
+        #[test]
+        fn valid_location() {
+            let location = Location::new(1, 2).unwrap();
+            assert_eq!(location.get_x(), 1_u8);
+            assert_eq!(location.get_y(), 2_u8);
+        }
+        #[test]
+        fn zero_location() {
+            assert_eq!(Location::new(0, 0), Ok(Location(0, 0)));
+        }
+        #[test]
+        fn place_x() {
+            let board = Board::new();
+            let location = Location::new(0, 0).unwrap();
+            assert_eq!(
+                board.place(Symbol::X, &location),
+                Ok(Board {
+                    board: [[Some(Symbol::X), None, None], [None; 3], [None; 3]]
+                })
+            )
+        }
+        #[test]
+        fn place_y() {
+            let board = Board::new();
+            let location = Location::new(1, 0).unwrap();
+            assert_eq!(
+                board.place(Symbol::X, &location),
+                Ok(Board {
+                    board: [[None; 3], [Some(Symbol::X), None, None], [None; 3]]
+                })
+            );
+        }
+        #[test]
+        fn invalid_place() {
+            let board = Board {
+                board: [[None; 3], [Some(Symbol::X), None, None], [None; 3]]
+            };
+            assert_eq!(
+                board.place(Symbol::O, &Location::new(1,0).unwrap()),
+                Err(BoardError::LocationTaken)
+            )
+        }
     }
 }
