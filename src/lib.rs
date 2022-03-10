@@ -71,6 +71,8 @@ pub mod board {
         }
     }
 
+    // TODO:add turn to board struct so incorrect sequences of assignment can be caught
+    // TODO:refactor to not use Option Symbol anymore and instead include Symbol::None as None as this removes a layer of abstraction
     #[derive(PartialEq, Debug)]
     pub struct Board {
         board: [[Option<Symbol>; 3]; 3],
