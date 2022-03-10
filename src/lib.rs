@@ -72,41 +72,40 @@ pub mod board {
     }
 
     // TODO:add turn to board struct so incorrect sequences of assignment can be caught
-    // TODO:refactor to not use Option Symbol anymore and instead include Symbol::None as None as this removes a layer of abstraction
     #[derive(PartialEq, Debug)]
     pub struct Board {
-        board: [[Option<Symbol>; 3]; 3],
+        board: [[Symbol; 3]; 3],
     }
 
     impl Board {
         pub fn new() -> Board {
             Board {
-                board: [[None; 3]; 3],
+                board: [[Symbol::None; 3]; 3],
             }
         }
 
         // TODO:refactor to make placing easier and not expose the location struct
         pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
             // check if place on board is free
-            if self.get_symbol(location) != None {
+            if self.get_symbol(location) != Symbol::None {
                 return Err(BoardError::LocationTaken);
             }
-            *self.get_slot(location)? = Some(symbol);
+            *self.get_slot(location)? = symbol;
             Ok(self)
         }
 
         fn get_slot<'a>(
             &'a mut self,
             location: &Location,
-        ) -> Result<&'a mut Option<Symbol>, BoardError> {
-            if self.get_symbol(location) != None {
+        ) -> Result<&'a mut Symbol, BoardError> {
+            if self.get_symbol(location) != Symbol::None {
                 Err(BoardError::LocationTaken)
             } else {
                 Ok(&mut self.board[location.get_x() as usize][location.get_y() as usize])
             }
         }
 
-        fn get_symbol(&self, location: &Location) -> Option<Symbol> {
+        fn get_symbol(&self, location: &Location) -> Symbol {
             *self
                 .board
                 .get(location.get_x() as usize)
@@ -122,15 +121,15 @@ pub mod board {
             write!(
                 f,
                 "{}|{}|{}\n-+-+-\n{}|{}|{}\n-+-+-\n{}|{}|{}\n",
-                self.get_symbol(&Location::new(0, 0).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(0, 1).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(0, 2).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(1, 0).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(1, 1).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(1, 2).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(2, 0).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(2, 1).unwrap()).unwrap_or(Symbol::None),
-                self.get_symbol(&Location::new(2, 2).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(0, 0).unwrap()),
+                self.get_symbol(&Location::new(0, 1).unwrap()),
+                self.get_symbol(&Location::new(0, 2).unwrap()),
+                self.get_symbol(&Location::new(1, 0).unwrap()),
+                self.get_symbol(&Location::new(1, 1).unwrap()),
+                self.get_symbol(&Location::new(1, 2).unwrap()),
+                self.get_symbol(&Location::new(2, 0).unwrap()),
+                self.get_symbol(&Location::new(2, 1).unwrap()),
+                self.get_symbol(&Location::new(2, 2).unwrap()),
             )
         }
     }
@@ -145,7 +144,7 @@ pub mod board {
             assert_eq!(
                 board.place(Symbol::X, &location),
                 Ok(Board {
-                    board: [[Some(Symbol::X), None, None], [None; 3], [None; 3]]
+                    board: [[Symbol::X, Symbol::None, Symbol::None], [Symbol::None; 3], [Symbol::None; 3]]
                 })
             )
         }
@@ -156,14 +155,14 @@ pub mod board {
             assert_eq!(
                 board.place(Symbol::X, &location),
                 Ok(Board {
-                    board: [[None; 3], [Some(Symbol::X), None, None], [None; 3]]
+                    board: [[Symbol::None; 3], [Symbol::X, Symbol::None, Symbol::None], [Symbol::None; 3]]
                 })
             );
         }
         #[test]
         fn invalid_place() {
             let board = Board {
-                board: [[None; 3], [Some(Symbol::X), None, None], [None; 3]],
+                board: [[Symbol::None; 3], [Symbol::X, Symbol::None, Symbol::None], [Symbol::None; 3]],
             };
             assert_eq!(
                 board.place(Symbol::O, &Location::new(1, 0).unwrap()),
@@ -172,7 +171,7 @@ pub mod board {
         }
         #[test]
         fn formatting() {
-            let board = Board{board:[[Some(Symbol::X), Some(Symbol::O), Some(Symbol::X)],[None, Some(Symbol::O), None],[None, None,Some(Symbol::X)]]};
+            let board = Board{board:[[Symbol::X, Symbol::O, Symbol::X],[Symbol::None, Symbol::O, Symbol::None],[Symbol::None, Symbol::None,Symbol::X]]};
             assert_eq!(board.to_string(),"X|O|X\n-+-+-\n |O| \n-+-+-\n | |X\n");
         }
     }
