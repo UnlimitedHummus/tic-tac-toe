@@ -1,5 +1,6 @@
 pub mod board {
     use location::*;
+    use std::fmt;
     #[derive(Debug, PartialEq)]
     pub enum BoardError {
         InvalidLocation,
@@ -57,6 +58,17 @@ pub mod board {
     pub enum Symbol {
         X,
         O,
+        None,
+    }
+
+    impl fmt::Display for Symbol {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            match &self {
+                Symbol::X => write!(f,"X"),
+                Symbol::O => write!(f,"O"),
+                Symbol::None => write!(f, " "),
+            }
+        }
     }
 
     #[derive(PartialEq, Debug)]
@@ -102,6 +114,24 @@ pub mod board {
         }
     }
 
+    impl fmt::Display for Board {
+        fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+            write!(
+                f,
+                "{}|{}|{}\n-+-+-\n{}|{}|{}\n-+-+-\n{}|{}|{}\n",
+                self.get_symbol(&Location::new(0, 0).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(0, 1).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(0, 2).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(1, 0).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(1, 1).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(1, 2).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(2, 0).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(2, 1).unwrap()).unwrap_or(Symbol::None),
+                self.get_symbol(&Location::new(2, 2).unwrap()).unwrap_or(Symbol::None),
+            )
+        }
+    }
+
     #[cfg(test)]
     mod tests {
         use super::*;
@@ -136,6 +166,11 @@ pub mod board {
                 board.place(Symbol::O, &Location::new(1, 0).unwrap()),
                 Err(BoardError::LocationTaken)
             )
+        }
+        #[test]
+        fn formatting() {
+            let board = Board{board:[[Some(Symbol::X), Some(Symbol::O), Some(Symbol::X)],[None, Some(Symbol::O), None],[None, None,Some(Symbol::X)]]};
+            assert_eq!(board.to_string(),"X|O|X\n-+-+-\n |O| \n-+-+-\n | |X\n");
         }
     }
 }
