@@ -85,12 +85,18 @@ pub mod board {
         }
 
         // TODO:refactor to make placing easier and not expose the location struct
-        pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
-            // check if place on board is free
-            if self.get_symbol(location) != Symbol::None {
+        pub fn x_on(self, x:u8, y:u8) -> Result<Self, BoardError> {
+            self.place(Symbol::X, x, y)
+        }
+        pub fn o_on(self, x:u8, y:u8) -> Result<Self, BoardError> {
+            self.place(Symbol::O, x, y)
+        }
+        fn place(mut self, symbol: Symbol, x: u8, y: u8) -> Result<Self, BoardError> {
+            let location = Location::new(x, y)?;
+            if self.get_symbol(&location) != Symbol::None {
                 return Err(BoardError::LocationTaken);
             }
-            *self.get_slot(location)? = symbol;
+            *self.get_slot(&location)? = symbol;
             Ok(self)
         }
 
@@ -138,34 +144,38 @@ pub mod board {
     mod tests {
         use super::*;
         #[test]
-        fn place_x() {
+        fn place_x_valid() {
             let board = Board::new();
-            let location = Location::new(0, 0).unwrap();
             assert_eq!(
-                board.place(Symbol::X, &location),
+                board.x_on(0,0),
                 Ok(Board {
                     board: [[Symbol::X, Symbol::None, Symbol::None], [Symbol::None; 3], [Symbol::None; 3]]
                 })
             )
         }
         #[test]
-        fn place_y() {
-            let board = Board::new();
-            let location = Location::new(1, 0).unwrap();
+        fn place_x_invalid() {
             assert_eq!(
-                board.place(Symbol::X, &location),
+                Board::new().x_on(3, 2),
+                Err(BoardError::InvalidLocation)
+            )
+        }
+        #[test]
+        fn place_o_valid() {
+            assert_eq!(
+                Board::new().o_on(1,0),
                 Ok(Board {
                     board: [[Symbol::None; 3], [Symbol::X, Symbol::None, Symbol::None], [Symbol::None; 3]]
                 })
             );
         }
         #[test]
-        fn invalid_place() {
+        fn place_o_invalid() {
             let board = Board {
                 board: [[Symbol::None; 3], [Symbol::X, Symbol::None, Symbol::None], [Symbol::None; 3]],
             };
             assert_eq!(
-                board.place(Symbol::O, &Location::new(1, 0).unwrap()),
+                board.o_on(1, 0),
                 Err(BoardError::LocationTaken)
             )
         }
