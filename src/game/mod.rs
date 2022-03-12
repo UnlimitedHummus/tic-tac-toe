@@ -5,6 +5,10 @@ use board::*;
 use player::Player;
 pub fn play(){
     tui::greet();
+    let board = Board::new();
+    while !board.is_winning(){
+        
+    }
     unimplemented!("whole gameplay loop in here");
 }
 

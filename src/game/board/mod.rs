@@ -46,6 +46,13 @@ impl Board {
             .get(location.get_y() as usize)
             .unwrap()
     }
+
+    pub fn is_winning(&self) -> bool {
+        todo!("use winning row winning column and winning diagonal functions");
+    }
+    fn winning_row(&self) -> bool {
+        [Symbol::X, Symbol::O].iter().any(|&comp|self.board.iter().any(|row| row.iter().all(|&symbol| symbol == comp)))
+    }
 }
 
 impl fmt::Display for Board {
@@ -117,5 +124,54 @@ mod tests {
             ],
         };
         assert_eq!(board.to_string(), "X|O|X\n-+-+-\n |O| \n-+-+-\n | |X\n");
+    }
+    #[test]
+    fn x_winning_on_first_row() {
+        let board = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::X],
+                [Symbol::None, Symbol::O, Symbol::None],
+                [Symbol::O, Symbol::None, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_row(), true);
+    }
+    #[test]
+    fn o_winning_on_first_row() {
+        let board = Board {
+            board: [
+                [Symbol::O, Symbol::O, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::None],
+                [Symbol::O, Symbol::None, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_row(), true);
+    }
+    #[test]
+    fn x_winning_on_third_row() {
+        let board = Board {
+            board: [
+                [Symbol::O, Symbol::X, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::None],
+                [Symbol::X, Symbol::X, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_row(), true);
+    }
+    #[test]
+    fn no_one_winning() {
+        let board = Board {
+            board: [
+                [Symbol::O, Symbol::X, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::None],
+                [Symbol::X, Symbol::O, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_row(), false);
+    }
+    #[test]
+    fn empty_board_no_winners() {
+        let board = Board::new();
+        assert_eq!(board.winning_row(), false);
     }
 }
