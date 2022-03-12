@@ -1,8 +1,8 @@
 mod location;
 mod symbol;
 use location::*;
-use symbol::*;
 use std::fmt;
+use symbol::*;
 #[derive(Debug, PartialEq)]
 pub enum BoardError {
     InvalidLocation,
@@ -51,7 +51,11 @@ impl Board {
         todo!("use winning row winning column and winning diagonal functions");
     }
     fn winning_row(&self) -> bool {
-        [Symbol::X, Symbol::O].iter().any(|&comp|self.board.iter().any(|row| row.iter().all(|&symbol| symbol == comp)))
+        [Symbol::X, Symbol::O].iter().any(|&comp| {
+            self.board
+                .iter()
+                .any(|row| row.iter().all(|&symbol| symbol == comp))
+        })
     }
 }
 
@@ -93,7 +97,7 @@ mod tests {
     #[test]
     fn place_o_valid() {
         assert_eq!(
-            Board::new().place(Symbol::O, &Location::new(1,0).unwrap()),
+            Board::new().place(Symbol::O, &Location::new(1, 0).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::None; 3],
@@ -112,7 +116,10 @@ mod tests {
                 [Symbol::None; 3],
             ],
         };
-        assert_eq!(board.place(Symbol::X, &Location::new(1, 0).unwrap()), Err(BoardError::LocationTaken))
+        assert_eq!(
+            board.place(Symbol::X, &Location::new(1, 0).unwrap()),
+            Err(BoardError::LocationTaken)
+        )
     }
     #[test]
     fn formatting() {
