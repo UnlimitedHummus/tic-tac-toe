@@ -1,8 +1,11 @@
 mod board;
 mod player;
+mod tui;
 use board::*;
 use player::Player;
+use tui::*;
 pub fn play(){
+    tui::greet();
     unimplemented!("whole gameplay loop in here");
 }
 
