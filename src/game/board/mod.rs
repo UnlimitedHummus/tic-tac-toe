@@ -51,6 +51,7 @@ impl Board {
         todo!("use winning row winning column and winning diagonal functions");
     }
     fn winning_row(&self) -> bool {
+        // for either Symbol check if any of the rows are completely filled with that symbol
         [Symbol::X, Symbol::O].iter().any(|&comp| {
             self.board
                 .iter()
