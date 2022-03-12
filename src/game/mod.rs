@@ -8,6 +8,21 @@ pub fn play(){
 
 struct Game {
     board: Board,
-    turn: Player,
+    pub active_player: Player,
+}
 
+impl Game {
+    fn new() -> Self {
+        Game{board: Board::new(), active_player: Player::X}
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    #[test]
+    fn player_x_begins () {
+        let game = Game::new();
+        assert_eq!(game.active_player, Player::X)
+    }
 }
