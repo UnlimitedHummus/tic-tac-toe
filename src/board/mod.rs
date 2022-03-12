@@ -1,28 +1,12 @@
 mod location;
+mod symbol;
 use location::*;
+use symbol::*;
 use std::fmt;
 #[derive(Debug, PartialEq)]
 pub enum BoardError {
     InvalidLocation,
     LocationTaken,
-}
-
-
-#[derive(Debug, PartialEq, Eq, Clone, Copy)]
-pub enum Symbol {
-    X,
-    O,
-    None,
-}
-
-impl fmt::Display for Symbol {
-    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        match &self {
-            Symbol::X => write!(f, "X"),
-            Symbol::O => write!(f, "O"),
-            Symbol::None => write!(f, " "),
-        }
-    }
 }
 
 // TODO:add turn to board struct so incorrect sequences of assignment can be caught
