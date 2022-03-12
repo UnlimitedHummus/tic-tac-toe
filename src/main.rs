@@ -1,4 +1,5 @@
-use tic_tac_toe::board::*;
+mod board;
+use crate::board::*;
 fn main() {
     println!("Welcome to Tic-Tac-Toe!");
     let board = Board::new();
