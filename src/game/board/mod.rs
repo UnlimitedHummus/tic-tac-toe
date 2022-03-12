@@ -9,7 +9,6 @@ pub enum BoardError {
     LocationTaken,
 }
 
-// TODO:add turn to board struct so incorrect sequences of assignment can be caught
 #[derive(PartialEq, Debug)]
 pub struct Board {
     board: [[Symbol; 3]; 3],
@@ -22,16 +21,8 @@ impl Board {
         }
     }
 
-    // TODO:refactor to make placing easier and not expose the location struct
-    pub fn x_on(self, x: u8, y: u8) -> Result<Self, BoardError> {
-        self.place(Symbol::X, x, y)
-    }
-    pub fn o_on(self, x: u8, y: u8) -> Result<Self, BoardError> {
-        self.place(Symbol::O, x, y)
-    }
-    fn place(mut self, symbol: Symbol, x: u8, y: u8) -> Result<Self, BoardError> {
-        let location = Location::new(x, y)?;
-        if self.get_symbol(&location) != Symbol::None {
+    fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
+        if self.get_symbol(location) != Symbol::None {
             return Err(BoardError::LocationTaken);
         }
         *self.get_slot(&location)? = symbol;
@@ -82,7 +73,7 @@ mod tests {
     fn place_x_valid() {
         let board = Board::new();
         assert_eq!(
-            board.x_on(0, 0),
+            board.place(Symbol::X, &Location::new(0, 0).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::X, Symbol::None, Symbol::None],
@@ -93,13 +84,9 @@ mod tests {
         )
     }
     #[test]
-    fn place_x_invalid() {
-        assert_eq!(Board::new().x_on(3, 2), Err(BoardError::InvalidLocation))
-    }
-    #[test]
     fn place_o_valid() {
         assert_eq!(
-            Board::new().o_on(1, 0),
+            Board::new().place(Symbol::O, &Location::new(1,0).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::None; 3],
@@ -118,7 +105,7 @@ mod tests {
                 [Symbol::None; 3],
             ],
         };
-        assert_eq!(board.o_on(1, 0), Err(BoardError::LocationTaken))
+        assert_eq!(board.place(Symbol::X, &Location::new(1, 0).unwrap()), Err(BoardError::LocationTaken))
     }
     #[test]
     fn formatting() {
