@@ -1,4 +1,5 @@
 use std::fmt;
+use super::super::player::Player;
 #[derive(Debug, PartialEq, Eq, Clone, Copy)]
 pub enum Symbol {
     X,
@@ -12,6 +13,15 @@ impl fmt::Display for Symbol {
             Symbol::X => write!(f, "X"),
             Symbol::O => write!(f, "O"),
             Symbol::None => write!(f, " "),
+        }
+    }
+}
+
+impl From<Player> for Symbol {
+    fn from(player: Player) -> Self{
+        match player {
+            Player::X => Symbol::X,
+            Player::O => Symbol::O,
         }
     }
 }
