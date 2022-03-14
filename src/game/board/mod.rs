@@ -49,7 +49,7 @@ impl Board {
     }
 
     pub fn is_winning(&self) -> bool {
-        todo!("use winning row winning column and winning diagonal functions");
+        self.winning_row() || self.winning_diagonal() || self.winning_col()
     }
     fn winning_row(&self) -> bool {
         // for either Symbol check if any of the rows are completely filled with that symbol
@@ -75,7 +75,7 @@ impl Board {
         let board = self.board;
         let main_diagonal = [Symbol::X, Symbol::O]
             .iter()
-            .any(|&comp| (0..2).all(|n| board[n][n] == comp));
+            .any(|&comp| (0..3).all(|n| board[n][n] == comp));
         let anti_diagonal = [Symbol::X, Symbol::O]
             .iter()
             .any(|&comp| board[0][2] == comp && board[1][1] == comp && board[2][0] == comp);
@@ -289,6 +289,12 @@ mod tests {
             ],
         };
         assert_eq!(board.winning_diagonal(), false);
+        let board = new_board!(
+            X,    O, X;
+            None, X, None;
+            None, O, None
+        );
+        assert_eq!(board.winning_diagonal(), false);
     }
     #[test]
     fn board_creation_macro() {
@@ -314,5 +320,36 @@ mod tests {
             ],
         };
         assert_eq!(board3, board4);
+    }
+    #[test]
+    fn winning_board() {
+        let board = new_board!(
+            X, X, X;
+            None, None, None;
+            None, O, None
+        );
+        assert_eq!(board.is_winning(), true);
+        let board = new_board!(
+            O, X, O;
+            None, O, None;
+            None, O, O
+        );
+        assert_eq!(board.is_winning(), true);
+        let board = new_board!(
+            O, X, O;
+            None, X, None;
+            None, X, O
+        );
+        assert_eq!(board.is_winning(), true);
+
+    }
+    #[test]
+    fn not_winning_board() {
+        let board = new_board!(
+            X,    O, X;
+            None, X, None;
+            None, O, None
+        );
+        assert_eq!(board.is_winning(), false);
     }
 }
