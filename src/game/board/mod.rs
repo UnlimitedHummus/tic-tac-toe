@@ -58,6 +58,9 @@ impl Board {
                 .any(|row| row.iter().all(|&symbol| symbol == comp))
         })
     }
+    fn winning_col(&self) -> bool {
+        [Symbol::X, Symbol::O].iter().any(|&comp| {(0..3).any(|n| self.board.iter().flatten().skip(n).step_by(3).all(|&symbol| symbol == comp))})
+    }
 }
 
 impl fmt::Display for Board {
@@ -181,5 +184,39 @@ mod tests {
     fn empty_board_no_winners() {
         let board = Board::new();
         assert_eq!(board.winning_row(), false);
+    }
+    #[test]
+    fn winning_col() {
+        let board = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::None],
+                [Symbol::X, Symbol::O, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_col(), true);
+        let board = Board {
+            board: [
+                [Symbol::X, Symbol::O, Symbol::O],
+                [Symbol::O, Symbol::O, Symbol::None],
+                [Symbol::X, Symbol::O, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_col(), true);
+        let board = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::O],
+                [Symbol::None, Symbol::O, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::O],
+            ],
+        };
+        assert_eq!(board.winning_col(), true);
+    }
+    #[test]
+    fn no_winning_col() {
+        let board = Board::new();
+        assert_eq!(board.winning_col(), false);
+        let board = board.place(Symbol::X, &Location::new(2,0).unwrap()).unwrap();
+        assert_eq!(board.winning_col(),false);
     }
 }
