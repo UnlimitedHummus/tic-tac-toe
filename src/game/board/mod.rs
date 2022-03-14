@@ -3,6 +3,7 @@ mod symbol;
 use location::*;
 use std::fmt;
 use symbol::*;
+
 #[derive(Debug, PartialEq)]
 pub enum BoardError {
     InvalidLocation,
@@ -59,7 +60,26 @@ impl Board {
         })
     }
     fn winning_col(&self) -> bool {
-        [Symbol::X, Symbol::O].iter().any(|&comp| {(0..3).any(|n| self.board.iter().flatten().skip(n).step_by(3).all(|&symbol| symbol == comp))})
+        [Symbol::X, Symbol::O].iter().any(|&comp| {
+            (0..3).any(|n| {
+                self.board
+                    .iter()
+                    .flatten()
+                    .skip(n)
+                    .step_by(3)
+                    .all(|&symbol| symbol == comp)
+            })
+        })
+    }
+    fn winning_diagonal(&self) -> bool {
+        let board = self.board;
+        let main_diagonal = [Symbol::X, Symbol::O]
+            .iter()
+            .any(|&comp| (0..2).all(|n| board[n][n] == comp));
+        let anti_diagonal = [Symbol::X, Symbol::O]
+            .iter()
+            .any(|&comp| board[0][2] == comp && board[1][1] == comp && board[2][0] == comp);
+        main_diagonal || anti_diagonal
     }
 }
 
@@ -84,6 +104,17 @@ impl fmt::Display for Board {
 #[cfg(test)]
 mod tests {
     use super::*;
+    macro_rules! new_board {
+        ($a:tt,$b:tt,$c:tt;$d:tt,$e:tt,$f:tt;$g:tt,$h:tt,$i:tt) => {
+            Board {
+                board: [
+                    [Symbol::$a, Symbol::$b, Symbol::$c],
+                    [Symbol::$d, Symbol::$e, Symbol::$f],
+                    [Symbol::$g, Symbol::$h, Symbol::$i],
+                ],
+            }
+        };
+    }
     #[test]
     fn place_x_valid() {
         let board = Board::new();
@@ -216,7 +247,72 @@ mod tests {
     fn no_winning_col() {
         let board = Board::new();
         assert_eq!(board.winning_col(), false);
-        let board = board.place(Symbol::X, &Location::new(2,0).unwrap()).unwrap();
-        assert_eq!(board.winning_col(),false);
+        let board = board
+            .place(Symbol::X, &Location::new(2, 0).unwrap())
+            .unwrap();
+        assert_eq!(board.winning_col(), false);
+    }
+    #[test]
+    fn winning_x_main_diagonal() {
+        let board = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::O],
+                [Symbol::None, Symbol::X, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_diagonal(), true);
+    }
+    #[test]
+    fn winning_o_main_diagonal() {
+        let board = new_board!(O, None, None;
+                               X, O, None;
+                               O, X, O);
+        assert_eq!(board.winning_diagonal(), true);
+    }
+    #[test]
+    fn winning_o_antidiagonal() {
+        let board = new_board!(
+            None, X, O;
+            None, O, X;
+            O, None, X
+        );
+        assert_eq!(board.winning_diagonal(), true);
+    }
+    #[test]
+    fn no_winning_diagonal() {
+        let board = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::O],
+                [Symbol::None, Symbol::None, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::X],
+            ],
+        };
+        assert_eq!(board.winning_diagonal(), false);
+    }
+    #[test]
+    fn board_creation_macro() {
+        let board1 = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::O],
+                [Symbol::None, Symbol::None, Symbol::O],
+                [Symbol::X, Symbol::O, Symbol::X],
+            ],
+        };
+        let board2 = new_board!(X, X ,O;
+                                None,None,O;
+                                X,O,X);
+        assert_eq!(board1, board2);
+        let board3 = new_board!(X, X, X;
+                                O, O, O;
+                                None, None, None);
+        let board4 = Board {
+            board: [
+                [Symbol::X, Symbol::X, Symbol::X],
+                [Symbol::O, Symbol::O, Symbol::O],
+                [Symbol::None, Symbol::None, Symbol::None],
+            ],
+        };
+        assert_eq!(board3, board4);
     }
 }
