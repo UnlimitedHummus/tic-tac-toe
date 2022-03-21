@@ -14,16 +14,8 @@ impl Location {
 
     pub fn from(n: usize) -> Result<Self, LocationError> {
         match n {
-            0 => Location::new(0, 0),
-            1 => Location::new(1, 0),
-            2 => Location::new(2, 0),
-            3 => Location::new(0, 1),
-            4 => Location::new(1, 1),
-            5 => Location::new(2, 1),
-            6 => Location::new(0, 2),
-            7 => Location::new(1, 2),
-            8 => Location::new(2, 2),
-            _ => Err(LocationError::InvalidInput),
+            0..=8 => Ok(Location(n as u8)),
+            _ => Err(LocationError::InvalidInput)
         }
     }
 
