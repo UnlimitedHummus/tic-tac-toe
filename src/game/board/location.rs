@@ -8,6 +8,21 @@ impl Location {
         Ok(Location(x, y))
     }
 
+    pub fn from(n: usize) -> Result<Self, BoardError> {
+        match n {
+            1 => Location::new(0, 0),
+            2 => Location::new(1, 0),
+            3 => Location::new(2, 0),
+            4 => Location::new(0, 1),
+            5 => Location::new(1, 1),
+            6 => Location::new(2, 1),
+            7 => Location::new(0, 2),
+            8 => Location::new(1, 2),
+            9 => Location::new(2, 2),
+            _ => Err(BoardError::InvalidLocation),
+        }
+    }
+
     fn valid_location(x: u8, y: u8) -> Result<(), BoardError> {
         match (x, y) {
             (x, y) if x < 3 && y < 3 => Ok(()),

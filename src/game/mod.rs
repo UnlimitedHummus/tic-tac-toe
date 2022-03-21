@@ -3,11 +3,13 @@ mod player;
 mod tui;
 use board::*;
 use player::Player;
+use board::symbol::*;
 pub fn play(){
     tui::greet();
-    let board = Board::new();
-    while !board.is_winning(){
-        
+    let game = Game::new();
+    while !game.board.is_winning(){ 
+        let location = tui::get_user_input(game.active_player);
+        //game.board = game.board.place(Symbol::from(game.active_player), &location);
     }
     unimplemented!("whole gameplay loop in here");
 }
