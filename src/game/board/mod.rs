@@ -1,8 +1,10 @@
-mod location;
-mod symbol;
+pub mod location;
+pub mod symbol;
 use location::*;
 use std::fmt;
 use symbol::*;
+
+//TODO: refactor this file
 
 #[derive(Debug, PartialEq)]
 pub enum BoardError {
@@ -22,7 +24,7 @@ impl Board {
         }
     }
 
-    fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
+    pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
         if self.get_symbol(location) != Symbol::None {
             return Err(BoardError::LocationTaken);
         }
@@ -81,6 +83,9 @@ impl Board {
             .any(|&comp| board[0][2] == comp && board[1][1] == comp && board[2][0] == comp);
         main_diagonal || anti_diagonal
     }
+    pub fn location_free(&self, location: &Location) -> bool {
+        self.get_symbol(location) == Symbol::None
+    }
 }
 
 impl fmt::Display for Board {
@@ -88,15 +93,15 @@ impl fmt::Display for Board {
         write!(
             f,
             "{}|{}|{}\n-+-+-\n{}|{}|{}\n-+-+-\n{}|{}|{}\n",
-            self.get_symbol(&Location::new(0, 0).unwrap()),
-            self.get_symbol(&Location::new(0, 1).unwrap()),
-            self.get_symbol(&Location::new(0, 2).unwrap()),
-            self.get_symbol(&Location::new(1, 0).unwrap()),
-            self.get_symbol(&Location::new(1, 1).unwrap()),
-            self.get_symbol(&Location::new(1, 2).unwrap()),
-            self.get_symbol(&Location::new(2, 0).unwrap()),
-            self.get_symbol(&Location::new(2, 1).unwrap()),
-            self.get_symbol(&Location::new(2, 2).unwrap()),
+            self.get_symbol(&Location::from(0).unwrap()),
+            self.get_symbol(&Location::from(1).unwrap()),
+            self.get_symbol(&Location::from(2).unwrap()),
+            self.get_symbol(&Location::from(3).unwrap()),
+            self.get_symbol(&Location::from(4).unwrap()),
+            self.get_symbol(&Location::from(5).unwrap()),
+            self.get_symbol(&Location::from(6).unwrap()),
+            self.get_symbol(&Location::from(7).unwrap()),
+            self.get_symbol(&Location::from(8).unwrap()),
         )
     }
 }
@@ -119,7 +124,7 @@ mod tests {
     fn place_x_valid() {
         let board = Board::new();
         assert_eq!(
-            board.place(Symbol::X, &Location::new(0, 0).unwrap()),
+            board.place(Symbol::X, &Location::from(0).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::X, Symbol::None, Symbol::None],
@@ -132,7 +137,7 @@ mod tests {
     #[test]
     fn place_o_valid() {
         assert_eq!(
-            Board::new().place(Symbol::O, &Location::new(1, 0).unwrap()),
+            Board::new().place(Symbol::O, &Location::from(1).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::None; 3],
@@ -152,7 +157,7 @@ mod tests {
             ],
         };
         assert_eq!(
-            board.place(Symbol::X, &Location::new(1, 0).unwrap()),
+            board.place(Symbol::X, &Location::from(1).unwrap()),
             Err(BoardError::LocationTaken)
         )
     }
@@ -160,12 +165,13 @@ mod tests {
     fn formatting() {
         let board = Board {
             board: [
+                // TODO: x and y look the other way around here
                 [Symbol::X, Symbol::O, Symbol::X],
                 [Symbol::None, Symbol::O, Symbol::None],
                 [Symbol::None, Symbol::None, Symbol::X],
             ],
         };
-        assert_eq!(board.to_string(), "X|O|X\n-+-+-\n |O| \n-+-+-\n | |X\n");
+        assert_eq!(board.to_string(), "X| | \n-+-+-\nO|O| \n-+-+-\nX| |X\n");
     }
     #[test]
     fn x_winning_on_first_row() {
@@ -248,7 +254,7 @@ mod tests {
         let board = Board::new();
         assert_eq!(board.winning_col(), false);
         let board = board
-            .place(Symbol::X, &Location::new(2, 0).unwrap())
+            .place(Symbol::X, &Location::from(2).unwrap())
             .unwrap();
         assert_eq!(board.winning_col(), false);
     }
@@ -351,5 +357,23 @@ mod tests {
             None, O, None
         );
         assert_eq!(board.is_winning(), false);
+    }
+    #[test]
+    fn location_taken() {
+        let board = new_board!(
+            X, O, X;
+            None, None, None;
+            None, None, None
+        );
+        assert_eq!(board.location_free(&Location::from(0).unwrap()),false);
+    }
+    #[test]
+    fn location_free() {
+        let board = new_board!(
+            X, O, X;
+            None, None, None;
+            None, None, None
+        );
+        assert_eq!(board.location_free(&Location::from(4).unwrap()), true);
     }
 }
