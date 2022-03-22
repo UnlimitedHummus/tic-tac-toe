@@ -93,15 +93,15 @@ impl fmt::Display for Board {
         write!(
             f,
             "{}|{}|{}\n-+-+-\n{}|{}|{}\n-+-+-\n{}|{}|{}\n",
-            self.get_symbol(&Location::from(0).unwrap()),
-            self.get_symbol(&Location::from(1).unwrap()),
-            self.get_symbol(&Location::from(2).unwrap()),
-            self.get_symbol(&Location::from(3).unwrap()),
-            self.get_symbol(&Location::from(4).unwrap()),
-            self.get_symbol(&Location::from(5).unwrap()),
-            self.get_symbol(&Location::from(6).unwrap()),
-            self.get_symbol(&Location::from(7).unwrap()),
-            self.get_symbol(&Location::from(8).unwrap()),
+            self.get_symbol(&Location::try_from(0).unwrap()),
+            self.get_symbol(&Location::try_from(1).unwrap()),
+            self.get_symbol(&Location::try_from(2).unwrap()),
+            self.get_symbol(&Location::try_from(3).unwrap()),
+            self.get_symbol(&Location::try_from(4).unwrap()),
+            self.get_symbol(&Location::try_from(5).unwrap()),
+            self.get_symbol(&Location::try_from(6).unwrap()),
+            self.get_symbol(&Location::try_from(7).unwrap()),
+            self.get_symbol(&Location::try_from(8).unwrap()),
         )
     }
 }
@@ -124,7 +124,7 @@ mod tests {
     fn place_x_valid() {
         let board = Board::new();
         assert_eq!(
-            board.place(Symbol::X, &Location::from(0).unwrap()),
+            board.place(Symbol::X, &Location::try_from(0).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::X, Symbol::None, Symbol::None],
@@ -137,7 +137,7 @@ mod tests {
     #[test]
     fn place_o_valid() {
         assert_eq!(
-            Board::new().place(Symbol::O, &Location::from(1).unwrap()),
+            Board::new().place(Symbol::O, &Location::try_from(1).unwrap()),
             Ok(Board {
                 board: [
                     [Symbol::None; 3],
@@ -157,7 +157,7 @@ mod tests {
             ],
         };
         assert_eq!(
-            board.place(Symbol::X, &Location::from(1).unwrap()),
+            board.place(Symbol::X, &Location::try_from(1).unwrap()),
             Err(BoardError::LocationTaken)
         )
     }
@@ -254,7 +254,7 @@ mod tests {
         let board = Board::new();
         assert_eq!(board.winning_col(), false);
         let board = board
-            .place(Symbol::X, &Location::from(2).unwrap())
+            .place(Symbol::X, &Location::try_from(2).unwrap())
             .unwrap();
         assert_eq!(board.winning_col(), false);
     }
@@ -365,7 +365,7 @@ mod tests {
             None, None, None;
             None, None, None
         );
-        assert_eq!(board.location_free(&Location::from(0).unwrap()),false);
+        assert_eq!(board.location_free(&Location::try_from(0).unwrap()),false);
     }
     #[test]
     fn location_free() {
@@ -374,6 +374,6 @@ mod tests {
             None, None, None;
             None, None, None
         );
-        assert_eq!(board.location_free(&Location::from(4).unwrap()), true);
+        assert_eq!(board.location_free(&Location::try_from(4).unwrap()), true);
     }
 }

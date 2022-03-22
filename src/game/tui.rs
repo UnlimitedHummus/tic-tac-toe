@@ -10,7 +10,7 @@ pub fn get_user_input(player: Player) -> Location
         println!("Where would you like to place your {} :", Symbol::from(player));
         io::stdin().read_line(&mut input).expect("Reading input went wrong");
         if let Ok(index) = input.split_whitespace().next().unwrap().parse::<usize>() {
-            if let Ok(location) = Location::from(index - 1) { // work 0 indexed only internally
+            if let Ok(location) = Location::try_from(index - 1) { // work 0 indexed only internally
                 return location
             } else {
                 println!("Please enter a number between 1 and 9");
