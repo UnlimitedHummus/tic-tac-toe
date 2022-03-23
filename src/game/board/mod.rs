@@ -8,11 +8,10 @@ use symbol::*;
 
 #[derive(Debug, PartialEq)]
 pub enum BoardError {
-    InvalidLocation,
-    LocationTaken,
+    LocationTaken(Board),
 }
 
-#[derive(PartialEq, Debug)]
+#[derive(PartialEq, Debug, Clone)]
 pub struct Board {
     board: [Symbol; 9],
 }
@@ -26,18 +25,14 @@ impl Board {
     // TODO: make place return the board even if an error occurs
     pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
         if self.get_symbol(location) != Symbol::None {
-            return Err(BoardError::LocationTaken);
+            return Err(BoardError::LocationTaken(self));
         }
-        *self.get_slot(&location)? = symbol;
+        *self.get_slot(location) = symbol;
         Ok(self)
     }
     //TODO: make location not a borrow location now implements the copy trait
-    fn get_slot<'a>(&'a mut self, location: &Location) -> Result<&'a mut Symbol, BoardError> {
-        if self.get_symbol(location) != Symbol::None {
-            Err(BoardError::LocationTaken)
-        } else {
-            Ok(&mut self.board[usize::from(*location)])
-        }
+    fn get_slot<'a>(&'a mut self, location: &Location) -> &'a mut Symbol {
+        &mut self.board[usize::from(*location)]
     }
 
     fn get_symbol(&self, location: &Location) -> Symbol {
@@ -139,9 +134,10 @@ mod tests {
             None,None,None;
             None,None,None
         );
+        let copy = board.clone();
         assert_eq!(
             board.place(Symbol::O, &Location::try_from(1).unwrap()),
-            Err(BoardError::LocationTaken)
+            Err(BoardError::LocationTaken(copy))
         )
     }
     #[test]
