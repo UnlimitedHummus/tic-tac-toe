@@ -4,8 +4,6 @@ use location::*;
 use std::fmt;
 use symbol::*;
 
-//TODO: refactor this file
-
 #[derive(Debug, PartialEq)]
 pub enum BoardError {
     LocationTaken(Board),
@@ -22,7 +20,7 @@ impl Board {
             board: [Symbol::None; 9],
         }
     }
-    // TODO: make place return the board even if an error occurs
+
     pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
         if self.get_symbol(location) != Symbol::None {
             return Err(BoardError::LocationTaken(self));
@@ -55,7 +53,10 @@ impl Board {
     }
     fn winning_row(&self) -> bool {
         [Symbol::X, Symbol::O].iter().any(|&comp| {
-            self.board.windows(3).step_by(3).any(|row| row.iter().all(|&symbol| symbol == comp))
+            self.board
+                .windows(3)
+                .step_by(3)
+                .any(|row| row.iter().all(|&symbol| symbol == comp))
         })
     }
     fn winning_diagonal(&self) -> bool {
@@ -98,9 +99,15 @@ mod tests {
         ($a:tt,$b:tt,$c:tt;$d:tt,$e:tt,$f:tt;$g:tt,$h:tt,$i:tt) => {
             Board {
                 board: [
-                    Symbol::$a, Symbol::$b, Symbol::$c,
-                    Symbol::$d, Symbol::$e, Symbol::$f,
-                    Symbol::$g, Symbol::$h, Symbol::$i,
+                    Symbol::$a,
+                    Symbol::$b,
+                    Symbol::$c,
+                    Symbol::$d,
+                    Symbol::$e,
+                    Symbol::$f,
+                    Symbol::$g,
+                    Symbol::$h,
+                    Symbol::$i,
                 ],
             }
         };
@@ -258,9 +265,15 @@ mod tests {
     fn board_creation_macro() {
         let board1 = Board {
             board: [
-                Symbol::X, Symbol::X, Symbol::O,
-                Symbol::None, Symbol::None, Symbol::O,
-                Symbol::X, Symbol::O, Symbol::X,
+                Symbol::X,
+                Symbol::X,
+                Symbol::O,
+                Symbol::None,
+                Symbol::None,
+                Symbol::O,
+                Symbol::X,
+                Symbol::O,
+                Symbol::X,
             ],
         };
         let board2 = new_board!(X, X ,O;
@@ -272,9 +285,15 @@ mod tests {
                                 None, None, None);
         let board4 = Board {
             board: [
-                Symbol::X, Symbol::X, Symbol::X,
-                Symbol::O, Symbol::O, Symbol::O,
-                Symbol::None, Symbol::None, Symbol::None,
+                Symbol::X,
+                Symbol::X,
+                Symbol::X,
+                Symbol::O,
+                Symbol::O,
+                Symbol::O,
+                Symbol::None,
+                Symbol::None,
+                Symbol::None,
             ],
         };
         assert_eq!(board3, board4);
@@ -299,7 +318,6 @@ mod tests {
             None, X, O
         );
         assert_eq!(board.is_winning(), true);
-
     }
     #[test]
     fn not_winning_board() {
@@ -317,7 +335,7 @@ mod tests {
             None, None, None;
             None, None, None
         );
-        assert_eq!(board.is_free(Location::try_from(0).unwrap()),false);
+        assert_eq!(board.is_free(Location::try_from(0).unwrap()), false);
     }
     #[test]
     fn location_free() {

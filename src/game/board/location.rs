@@ -2,8 +2,8 @@
 pub struct Location(u8);
 
 #[derive(Debug, PartialEq)]
-pub enum LocationError{
-    InvalidInput
+pub enum LocationError {
+    InvalidInput,
 }
 
 impl Location {
@@ -12,7 +12,7 @@ impl Location {
     }
 
     pub fn get_y(&self) -> u8 {
-       self.0 / 3
+        self.0 / 3
     }
 }
 
@@ -21,14 +21,14 @@ impl TryFrom<usize> for Location {
     fn try_from(num: usize) -> Result<Self, LocationError> {
         match num {
             0..=8 => Ok(Location(num as u8)),
-            _ => Err(LocationError::InvalidInput)
+            _ => Err(LocationError::InvalidInput),
         }
     }
 }
 
 impl From<Location> for usize {
     fn from(location: Location) -> Self {
-        return location.0 as usize
+        return location.0 as usize;
     }
 }
 
@@ -68,9 +68,8 @@ mod tests {
         let location2 = Location::try_from(3).unwrap();
         let location3 = Location::try_from(8).unwrap();
         assert_eq!(location1.get_x(), 1);
-        assert_eq!(location2.get_x(),0);
+        assert_eq!(location2.get_x(), 0);
         assert_eq!(location3.get_x(), 2);
-
     }
     #[test]
     fn get_y() {
