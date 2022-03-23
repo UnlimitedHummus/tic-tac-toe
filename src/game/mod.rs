@@ -6,12 +6,24 @@ use player::Player;
 use board::symbol::*;
 pub fn play(){
     tui::greet();
-    let game = Game::new();
+    let mut game = Game::new();
     while !game.board.is_winning(){ 
+        tui::display_board(&game.board);
         let location = tui::get_user_input(game.active_player);
-        //game.board = game.board.place(Symbol::from(game.active_player), &location);
+        match game.board.place(Symbol::from(game.active_player), &location) {
+            Ok(board) => {
+                game.board = board;
+                game.swap_active_player();
+            },
+            Err(BoardError::LocationTaken(board)) => {
+                game.board = board; 
+                tui::location_taken();
+                continue
+            },
+        }
     }
-    unimplemented!("whole gameplay loop in here");
+    game.swap_active_player();
+    tui::you_won(game.active_player);
 }
 
 struct Game {

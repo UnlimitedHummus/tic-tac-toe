@@ -2,6 +2,7 @@ use super::player::Player;
 use super::board::symbol::*;
 use super::board::location::Location;
 use std::io;
+use super::board::Board;
 // TODO: figure out how to unit test this function
 pub fn get_user_input(player: Player) -> Location 
 {
@@ -21,14 +22,18 @@ pub fn get_user_input(player: Player) -> Location
     }
 
 }
-pub fn invalid_location() {
+pub fn location_taken() {
     println!("The last input was not valid. Please try again!");
 }
-pub fn display_board(){
-    todo!("Display the board");
+pub fn display_board(board: &Board){
+    println!("{}", board)
 }
 pub fn greet(){
     println!("Welcome to Tic-Tac-Toe!");
+}
+
+pub fn you_won(player: Player) {
+    println!("Congratulations Player {} you won!", Symbol::from(player));
 }
 
 #[cfg(test)]
