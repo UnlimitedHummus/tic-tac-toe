@@ -1,29 +1,38 @@
 mod board;
 mod player;
 mod tui;
+use board::symbol::*;
 use board::*;
 use player::Player;
-use board::symbol::*;
-pub fn play(){
+pub fn play() {
     tui::greet();
     let mut game = Game::new();
-    while !game.board.is_winning(){ 
+    for _round in 1..10 {
         tui::display_board(&game.board);
         let location = tui::get_user_input(game.active_player);
-        match game.board.place(Symbol::from(game.active_player), &location) {
+        match game
+            .board
+            .place(Symbol::from(game.active_player), &location)
+        {
             Ok(board) => {
                 game.board = board;
                 game.swap_active_player();
-            },
+            }
             Err(BoardError::LocationTaken(board)) => {
-                game.board = board; 
+                game.board = board;
                 tui::location_taken();
-                continue
-            },
+                continue;
+            }
+        }
+        if game.board.is_winning() {
+            game.swap_active_player();
+            tui::display_board(&game.board);
+            tui::you_won(game.active_player);
+            return;
         }
     }
-    game.swap_active_player();
-    tui::you_won(game.active_player);
+    tui::display_board(&game.board);
+    tui::draw();
 }
 
 struct Game {
@@ -33,11 +42,14 @@ struct Game {
 
 impl Game {
     fn new() -> Self {
-        Game{board: Board::new(), active_player: Player::X}
+        Game {
+            board: Board::new(),
+            active_player: Player::X,
+        }
     }
 
     fn swap_active_player(&mut self) {
-        self.active_player = ! self.active_player;
+        self.active_player = !self.active_player;
     }
 }
 
@@ -45,7 +57,7 @@ impl Game {
 mod tests {
     use super::*;
     #[test]
-    fn player_x_begins () {
+    fn player_x_begins() {
         let game = Game::new();
         assert_eq!(game.active_player, Player::X)
     }
