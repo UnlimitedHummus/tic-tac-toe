@@ -23,7 +23,7 @@ impl Board {
             board: [Symbol::None; 9],
         }
     }
-
+    // TODO: make place return the board even if an error occurs
     pub fn place(mut self, symbol: Symbol, location: &Location) -> Result<Self, BoardError> {
         if self.get_symbol(location) != Symbol::None {
             return Err(BoardError::LocationTaken);
@@ -73,8 +73,8 @@ impl Board {
             .any(|&comp| board[2] == comp && board[4] == comp && board[6] == comp);
         main_diagonal || anti_diagonal
     }
-    pub fn location_free(&self, location: &Location) -> bool {
-        self.get_symbol(location) == Symbol::None
+    pub fn is_free(&self, location: Location) -> bool {
+        self.get_symbol(&location) == Symbol::None
     }
 }
 
@@ -321,7 +321,7 @@ mod tests {
             None, None, None;
             None, None, None
         );
-        assert_eq!(board.location_free(&Location::try_from(0).unwrap()),false);
+        assert_eq!(board.is_free(Location::try_from(0).unwrap()),false);
     }
     #[test]
     fn location_free() {
@@ -330,6 +330,6 @@ mod tests {
             None, None, None;
             None, None, None
         );
-        assert_eq!(board.location_free(&Location::try_from(4).unwrap()), true);
+        assert_eq!(board.is_free(Location::try_from(4).unwrap()), true);
     }
 }
