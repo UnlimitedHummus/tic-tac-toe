@@ -55,13 +55,7 @@ impl Board {
     }
     fn winning_row(&self) -> bool {
         // for either Symbol check if any of the rows are completely filled with that symbol
-        [Symbol::X, Symbol::O].iter().any(|&comp| {
-            self.board
-                .iter()
-                .any(|row| row.iter().all(|&symbol| symbol == comp))
-        })
-    }
-    fn winning_col(&self) -> bool {
+        // FIXME: definition of row and column keep changing
         [Symbol::X, Symbol::O].iter().any(|&comp| {
             (0..3).any(|n| {
                 self.board
@@ -71,6 +65,13 @@ impl Board {
                     .step_by(3)
                     .all(|&symbol| symbol == comp)
             })
+        })
+    }
+    fn winning_col(&self) -> bool {
+        [Symbol::X, Symbol::O].iter().any(|&comp| {
+            self.board
+                .iter()
+                .any(|row| row.iter().all(|&symbol| symbol == comp))
         })
     }
     fn winning_diagonal(&self) -> bool {
@@ -113,9 +114,9 @@ mod tests {
         ($a:tt,$b:tt,$c:tt;$d:tt,$e:tt,$f:tt;$g:tt,$h:tt,$i:tt) => {
             Board {
                 board: [
-                    [Symbol::$a, Symbol::$b, Symbol::$c],
-                    [Symbol::$d, Symbol::$e, Symbol::$f],
-                    [Symbol::$g, Symbol::$h, Symbol::$i],
+                    [Symbol::$a, Symbol::$d, Symbol::$g],
+                    [Symbol::$b, Symbol::$e, Symbol::$h],
+                    [Symbol::$c, Symbol::$f, Symbol::$i],
                 ],
             }
         };
@@ -125,96 +126,75 @@ mod tests {
         let board = Board::new();
         assert_eq!(
             board.place(Symbol::X, &Location::try_from(0).unwrap()),
-            Ok(Board {
-                board: [
-                    [Symbol::X, Symbol::None, Symbol::None],
-                    [Symbol::None; 3],
-                    [Symbol::None; 3]
-                ]
-            })
-        )
+            Ok(new_board!(
+                X, None, None;
+                None,None,None;
+                None,None,None))
+        );
     }
     #[test]
     fn place_o_valid() {
         assert_eq!(
             Board::new().place(Symbol::O, &Location::try_from(1).unwrap()),
-            Ok(Board {
-                board: [
-                    [Symbol::None; 3],
-                    [Symbol::O, Symbol::None, Symbol::None],
-                    [Symbol::None; 3]
-                ]
-            })
+            Ok(new_board!(
+                None,O,None;
+                None,None,None;
+                None,None,None
+            ))
         );
     }
     #[test]
     fn place_o_invalid() {
-        let board = Board {
-            board: [
-                [Symbol::None; 3],
-                [Symbol::X, Symbol::None, Symbol::None],
-                [Symbol::None; 3],
-            ],
-        };
+        let board = new_board!(
+            None,X,None;
+            None,None,None;
+            None,None,None
+        );
         assert_eq!(
-            board.place(Symbol::X, &Location::try_from(1).unwrap()),
+            board.place(Symbol::O, &Location::try_from(1).unwrap()),
             Err(BoardError::LocationTaken)
         )
     }
     #[test]
     fn formatting() {
-        let board = Board {
-            board: [
-                // TODO: x and y look the other way around here
-                [Symbol::X, Symbol::O, Symbol::X],
-                [Symbol::None, Symbol::O, Symbol::None],
-                [Symbol::None, Symbol::None, Symbol::X],
-            ],
-        };
-        assert_eq!(board.to_string(), "X| | \n-+-+-\nO|O| \n-+-+-\nX| |X\n");
+        let board = new_board!(
+            X,O,X;
+            None,O,None;
+            None,None,X);
+        assert_eq!(board.to_string(), "X|O|X\n-+-+-\n |O| \n-+-+-\n | |X\n");
     }
     #[test]
     fn x_winning_on_first_row() {
-        let board = Board {
-            board: [
-                [Symbol::X, Symbol::X, Symbol::X],
-                [Symbol::None, Symbol::O, Symbol::None],
-                [Symbol::O, Symbol::None, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+                X,X,X;
+                None,O,None;
+                O,None,X);
         assert_eq!(board.winning_row(), true);
     }
     #[test]
     fn o_winning_on_first_row() {
-        let board = Board {
-            board: [
-                [Symbol::O, Symbol::O, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::None],
-                [Symbol::O, Symbol::None, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+            O,O,O;
+            X,O,None;
+            O,None,X
+        );
         assert_eq!(board.winning_row(), true);
     }
     #[test]
     fn x_winning_on_third_row() {
-        let board = Board {
-            board: [
-                [Symbol::O, Symbol::X, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::None],
-                [Symbol::X, Symbol::X, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+            O,X,O;
+            X,O,None;
+            X,X,X
+        );
         assert_eq!(board.winning_row(), true);
     }
     #[test]
     fn no_one_winning() {
-        let board = Board {
-            board: [
-                [Symbol::O, Symbol::X, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::None],
-                [Symbol::X, Symbol::O, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+            O,X,O;
+            X,O,None;
+            X,O,X);
         assert_eq!(board.winning_row(), false);
     }
     #[test]
@@ -224,29 +204,21 @@ mod tests {
     }
     #[test]
     fn winning_col() {
-        let board = Board {
-            board: [
-                [Symbol::X, Symbol::X, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::None],
-                [Symbol::X, Symbol::O, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+            X,X,O;
+            X,O,O;
+            X,None,X
+        );
         assert_eq!(board.winning_col(), true);
-        let board = Board {
-            board: [
-                [Symbol::X, Symbol::O, Symbol::O],
-                [Symbol::O, Symbol::O, Symbol::None],
-                [Symbol::X, Symbol::O, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+                X,O,X;
+                None,O,O;
+                O,O,X);
         assert_eq!(board.winning_col(), true);
-        let board = Board {
-            board: [
-                [Symbol::X, Symbol::X, Symbol::O],
-                [Symbol::None, Symbol::O, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::O],
-            ],
-        };
+        let board = new_board!(
+                X,X,O;
+                None,O,O;
+                X,O,O);
         assert_eq!(board.winning_col(), true);
     }
     #[test]
@@ -260,20 +232,18 @@ mod tests {
     }
     #[test]
     fn winning_x_main_diagonal() {
-        let board = Board {
-            board: [
-                [Symbol::X, Symbol::X, Symbol::O],
-                [Symbol::None, Symbol::X, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+            X,X,O;
+            None,X,O;
+            X,O,X);
         assert_eq!(board.winning_diagonal(), true);
     }
     #[test]
     fn winning_o_main_diagonal() {
-        let board = new_board!(O, None, None;
-                               X, O, None;
-                               O, X, O);
+        let board = new_board!(
+            O, None, None;
+            X, O, None;
+            O, X, O);
         assert_eq!(board.winning_diagonal(), true);
     }
     #[test]
@@ -287,13 +257,10 @@ mod tests {
     }
     #[test]
     fn no_winning_diagonal() {
-        let board = Board {
-            board: [
-                [Symbol::X, Symbol::X, Symbol::O],
-                [Symbol::None, Symbol::None, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::X],
-            ],
-        };
+        let board = new_board!(
+            X,X,O;
+            None,None,O;
+            X,O,X);
         assert_eq!(board.winning_diagonal(), false);
         let board = new_board!(
             X,    O, X;
@@ -306,9 +273,9 @@ mod tests {
     fn board_creation_macro() {
         let board1 = Board {
             board: [
-                [Symbol::X, Symbol::X, Symbol::O],
-                [Symbol::None, Symbol::None, Symbol::O],
-                [Symbol::X, Symbol::O, Symbol::X],
+                [Symbol::X, Symbol::None, Symbol::X],
+                [Symbol::X, Symbol::None, Symbol::O],
+                [Symbol::O, Symbol::O, Symbol::X],
             ],
         };
         let board2 = new_board!(X, X ,O;
@@ -320,9 +287,9 @@ mod tests {
                                 None, None, None);
         let board4 = Board {
             board: [
-                [Symbol::X, Symbol::X, Symbol::X],
-                [Symbol::O, Symbol::O, Symbol::O],
-                [Symbol::None, Symbol::None, Symbol::None],
+                [Symbol::X, Symbol::O, Symbol::None],
+                [Symbol::X, Symbol::O, Symbol::None],
+                [Symbol::X, Symbol::O, Symbol::None],
             ],
         };
         assert_eq!(board3, board4);
