@@ -14,13 +14,13 @@ pub enum BoardError {
 
 #[derive(PartialEq, Debug)]
 pub struct Board {
-    board: [[Symbol; 3]; 3],
+    board: [Symbol; 9],
 }
 
 impl Board {
     pub fn new() -> Board {
         Board {
-            board: [[Symbol::None; 3]; 3],
+            board: [Symbol::None; 9],
         }
     }
 
@@ -31,57 +31,46 @@ impl Board {
         *self.get_slot(&location)? = symbol;
         Ok(self)
     }
-
+    //TODO: make location not a borrow location now implements the copy trait
     fn get_slot<'a>(&'a mut self, location: &Location) -> Result<&'a mut Symbol, BoardError> {
         if self.get_symbol(location) != Symbol::None {
             Err(BoardError::LocationTaken)
         } else {
-            Ok(&mut self.board[location.get_x() as usize][location.get_y() as usize])
+            Ok(&mut self.board[usize::from(*location)])
         }
     }
 
     fn get_symbol(&self, location: &Location) -> Symbol {
-        *self
-            .board
-            .get(location.get_x() as usize)
-            .unwrap()
-            .clone()
-            .get(location.get_y() as usize)
-            .unwrap()
+        *self.board.get(usize::from(*location)).unwrap()
     }
 
     pub fn is_winning(&self) -> bool {
         self.winning_row() || self.winning_diagonal() || self.winning_col()
     }
-    fn winning_row(&self) -> bool {
-        // for either Symbol check if any of the rows are completely filled with that symbol
-        // FIXME: definition of row and column keep changing
+    fn winning_col(&self) -> bool {
         [Symbol::X, Symbol::O].iter().any(|&comp| {
             (0..3).any(|n| {
                 self.board
                     .iter()
-                    .flatten()
                     .skip(n)
                     .step_by(3)
                     .all(|&symbol| symbol == comp)
             })
         })
     }
-    fn winning_col(&self) -> bool {
+    fn winning_row(&self) -> bool {
         [Symbol::X, Symbol::O].iter().any(|&comp| {
-            self.board
-                .iter()
-                .any(|row| row.iter().all(|&symbol| symbol == comp))
+            self.board.windows(3).step_by(3).any(|row| row.iter().all(|&symbol| symbol == comp))
         })
     }
     fn winning_diagonal(&self) -> bool {
         let board = self.board;
         let main_diagonal = [Symbol::X, Symbol::O]
             .iter()
-            .any(|&comp| (0..3).all(|n| board[n][n] == comp));
+            .any(|&comp| board[0] == comp && board[4] == comp && board[8] == comp);
         let anti_diagonal = [Symbol::X, Symbol::O]
             .iter()
-            .any(|&comp| board[0][2] == comp && board[1][1] == comp && board[2][0] == comp);
+            .any(|&comp| board[2] == comp && board[4] == comp && board[6] == comp);
         main_diagonal || anti_diagonal
     }
     pub fn location_free(&self, location: &Location) -> bool {
@@ -114,9 +103,9 @@ mod tests {
         ($a:tt,$b:tt,$c:tt;$d:tt,$e:tt,$f:tt;$g:tt,$h:tt,$i:tt) => {
             Board {
                 board: [
-                    [Symbol::$a, Symbol::$d, Symbol::$g],
-                    [Symbol::$b, Symbol::$e, Symbol::$h],
-                    [Symbol::$c, Symbol::$f, Symbol::$i],
+                    Symbol::$a, Symbol::$b, Symbol::$c,
+                    Symbol::$d, Symbol::$e, Symbol::$f,
+                    Symbol::$g, Symbol::$h, Symbol::$i,
                 ],
             }
         };
@@ -273,9 +262,9 @@ mod tests {
     fn board_creation_macro() {
         let board1 = Board {
             board: [
-                [Symbol::X, Symbol::None, Symbol::X],
-                [Symbol::X, Symbol::None, Symbol::O],
-                [Symbol::O, Symbol::O, Symbol::X],
+                Symbol::X, Symbol::X, Symbol::O,
+                Symbol::None, Symbol::None, Symbol::O,
+                Symbol::X, Symbol::O, Symbol::X,
             ],
         };
         let board2 = new_board!(X, X ,O;
@@ -287,9 +276,9 @@ mod tests {
                                 None, None, None);
         let board4 = Board {
             board: [
-                [Symbol::X, Symbol::O, Symbol::None],
-                [Symbol::X, Symbol::O, Symbol::None],
-                [Symbol::X, Symbol::O, Symbol::None],
+                Symbol::X, Symbol::X, Symbol::X,
+                Symbol::O, Symbol::O, Symbol::O,
+                Symbol::None, Symbol::None, Symbol::None,
             ],
         };
         assert_eq!(board3, board4);
