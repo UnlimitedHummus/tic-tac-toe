@@ -69,9 +69,6 @@ impl Board {
             .any(|&comp| board[2] == comp && board[4] == comp && board[6] == comp);
         main_diagonal || anti_diagonal
     }
-    pub fn is_free(&self, location: Location) -> bool {
-        self.get_symbol(&location) == Symbol::None
-    }
 }
 
 impl fmt::Display for Board {
@@ -327,23 +324,5 @@ mod tests {
             None, O, None
         );
         assert_eq!(board.is_winning(), false);
-    }
-    #[test]
-    fn location_taken() {
-        let board = new_board!(
-            X, O, X;
-            None, None, None;
-            None, None, None
-        );
-        assert_eq!(board.is_free(Location::try_from(0).unwrap()), false);
-    }
-    #[test]
-    fn location_free() {
-        let board = new_board!(
-            X, O, X;
-            None, None, None;
-            None, None, None
-        );
-        assert_eq!(board.is_free(Location::try_from(4).unwrap()), true);
     }
 }
